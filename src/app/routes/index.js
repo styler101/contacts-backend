@@ -12,6 +12,8 @@ routes.post('/contacts', ContactController.store);
 
 routes.delete('/contacts/:id', ContactController.delete);
 
+routes.put('/contacts/:id', ContactController.update);
+
 // middlewares -> são funções que interceptam as requisições de request e response
 // Request <--> Middlewares -> Controller -> Response
 

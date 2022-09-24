@@ -29,10 +29,14 @@ class ContactController {
       const {
         name, email, phone, category_id,
       } = request.body;
+
+      if (!name) {
+        return response.status(400).json({ message: 'Name is required' });
+      }
       const contactExists = await ContactsRepository.findByEmail(email);
 
       if (contactExists) {
-        return response.status(400).json({ message: 'This e-mail is already been taken' });
+        return response.status(400).json({ message: 'This e-mail is already in used' });
       }
 
       const contact = await ContactsRepository.create({
@@ -40,13 +44,39 @@ class ContactController {
       });
       return response.status(201).json(contact);
     } catch (error) {
-      console.log(error);
       return response.status(400).json({ message: 'Invalid Request' });
     }
   }
 
-  update(request, response) {
-    // Editar um registro
+  async update(request, response) {
+    const { id } = request.params;
+    const {
+      name, email, phone, category_id,
+    } = request.body;
+
+    // name is the only required field
+    const findContactById = await ContactsRepository.findById(id);
+    if (!findContactById) {
+      return response.status(400).json({ message: 'Ressource not found' });
+    }
+
+    if (!name) {
+      return response.status(400).json({ message: 'Field name must be required' });
+    }
+
+    const contactExists = await ContactsRepository.findByEmail(email);
+    if (contactExists && findContactById.id !== id) {
+      return response.status(400).json({ message: 'This e-mail is already in used' });
+    }
+
+    const updatedContact = await ContactsRepository.update(id, {
+      name,
+      email,
+      phone,
+      category_id,
+    });
+
+    return response.status(200).json(updatedContact);
   }
 
   async delete(request, response) {
