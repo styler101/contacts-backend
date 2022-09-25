@@ -6,9 +6,13 @@ const AppError = require('../errors');
 
 class ContactController {
   async index(request, response) {
-    const { orderBy } = request.query;
-    const contacts = await ContactsRepository.findAll(orderBy);
-    return response.status(200).json(contacts);
+    try {
+      const { orderBy } = request.query;
+      const contacts = await ContactsRepository.findAll(orderBy);
+      return response.status(200).json(contacts);
+    } catch (error) {
+      return response.status(400).json({ message: error.message });
+    }
   }
 
   async show(request, response) {

@@ -12,6 +12,18 @@ class CategoryController {
     }
   }
 
+  async show(request, response) {
+    try {
+      const { id } = request.params;
+      const category = await CategoryRepository.findById(id);
+      if (!category) throw new AppError('Ressource not found!', 400);
+
+      return response.status(200).json(category);
+    } catch (error) {
+      return response.status(400).json({ success: false, message: error.message });
+    }
+  }
+
   async store(request, response) {
     try {
       const { name } = request.body;
@@ -27,8 +39,6 @@ class CategoryController {
       return response.status(error.status).json({ message: error.message });
     }
   }
-
-  async;
 }
 
 module.exports = new CategoryController();
