@@ -21,6 +21,16 @@ class CategoryRepository {
     const [row] = await database.query('INSERT INTO categories(name) values($1) RETURNING *', [name]);
     return row;
   }
+
+  async delete(id) {
+    const deleteOperation = await database.query('DELETE FROM categories WHERE id=$1', [id]);
+    return deleteOperation;
+  }
+
+  async update(id, { name }) {
+    const [row] = await database.query('UPDATE categories SET name=$1 WHERE id=$2 RETURNING *', [name, id]);
+    return row;
+  }
 }
 
 module.exports = new CategoryRepository();
