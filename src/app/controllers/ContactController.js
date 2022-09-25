@@ -1,5 +1,5 @@
 const ContactsRepository = require('../repositories/ContactsRepository');
-
+const AppError = require('../errors');
 // O controller é responsável por gerenciar a regra de negócio da nossa aplicação
 // Singleton -> design  patterns que diz que só vamos trabalhar com uma instância
 //  da nossa aplicação salva a instância na memória
@@ -15,13 +15,10 @@ class ContactController {
     try {
       const { id } = request.params;
       const findContact = await ContactsRepository.findById(id);
-      if (!findContact) {
-        return response.status(404).json({ message: 'Contact Not found' });
-      }
-
+      if (!findContact) throw new AppError('Contact not found!', 404);
       return response.status(200).json(findContact);
     } catch (error) {
-      return response.status(404).json({ message: 'Ressource not found' });
+      return response.status(error.status).json({ message: error.message });
     }
   }
 
@@ -31,21 +28,18 @@ class ContactController {
         name, email, phone, category_id,
       } = request.body;
 
-      if (!name) {
-        return response.status(400).json({ message: 'Name is required' });
-      }
+      if (!name) throw new AppError('Field name is required', 400);
+
       const contactExists = await ContactsRepository.findByEmail(email);
 
-      if (contactExists) {
-        return response.status(400).json({ message: 'This e-mail is already in used' });
-      }
+      if (contactExists) throw new AppError('This e-mails is already in used', 400);
 
       const contact = await ContactsRepository.create({
         name, email, phone, category_id,
       });
       return response.status(201).json(contact);
     } catch (error) {
-      return response.status(400).json({ message: 'Invalid Request' });
+      return response.status(error.status).json({ message: error.message });
     }
   }
 
@@ -57,18 +51,12 @@ class ContactController {
 
     // name is the only required field
     const findContactById = await ContactsRepository.findById(id);
-    if (!findContactById) {
-      return response.status(400).json({ message: 'Ressource not found' });
-    }
+    if (!findContactById) throw new AppError('Ressource not found!', 400);
 
-    if (!name) {
-      return response.status(400).json({ message: 'Field name is required' });
-    }
+    if (!name) throw new AppError('Field name is required', 400);
 
     const contactExists = await ContactsRepository.findByEmail(email);
-    if (contactExists && findContactById.id !== id) {
-      return response.status(400).json({ message: 'This e-mail is already in used' });
-    }
+    if (contactExists && findContactById.id !== id) throw new AppError('This e-mail is already in used', 400);
 
     const updatedContact = await ContactsRepository.update(id, {
       id,
@@ -86,9 +74,7 @@ class ContactController {
       const { id } = request.params;
 
       const contact = await ContactsRepository.findById(id);
-      if (!contact) {
-        return response.status(404).json({ message: 'This contact does not exits' });
-      }
+      if (!contact) throw new AppError('This contact does not exists', 400);
       const success = await ContactsRepository.delete(id);
       return response.status(200).json({ success: true });
     } catch (error) {
