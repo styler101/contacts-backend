@@ -6,7 +6,8 @@ const ContactsRepository = require('../repositories/ContactsRepository');
 
 class ContactController {
   async index(request, response) {
-    const contacts = await ContactsRepository.findAll();
+    const { orderBy } = request.query;
+    const contacts = await ContactsRepository.findAll(orderBy);
     return response.status(200).json(contacts);
   }
 
@@ -61,7 +62,7 @@ class ContactController {
     }
 
     if (!name) {
-      return response.status(400).json({ message: 'Field name must be required' });
+      return response.status(400).json({ message: 'Field name is required' });
     }
 
     const contactExists = await ContactsRepository.findByEmail(email);
@@ -70,6 +71,7 @@ class ContactController {
     }
 
     const updatedContact = await ContactsRepository.update(id, {
+      id,
       name,
       email,
       phone,
@@ -88,7 +90,7 @@ class ContactController {
         return response.status(404).json({ message: 'This contact does not exits' });
       }
       const success = await ContactsRepository.delete(id);
-      return response.status(200).json({ success });
+      return response.status(200).json({ success: true });
     } catch (error) {
       return response.status(400).json({ message: 'Invalid Request' });
     }
