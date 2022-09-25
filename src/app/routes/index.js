@@ -17,6 +17,8 @@ routes.put('/contacts/:id', ContactController.update);
 
 routes.get('/categories', CategoryController.index);
 
+routes.post('/categories', CategoryController.store);
+
 // middlewares -> são funções que interceptam as requisições de request e response
 // Request <--> Middlewares -> Controller -> Response
 
