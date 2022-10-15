@@ -20,7 +20,7 @@ class CategoryController {
 
       return response.status(200).json(category);
     } catch (error) {
-      return response.status(400).json({ success: false, message: error.message });
+      return response.status(error.status).json({ message: error.message });
     }
   }
 
@@ -54,7 +54,6 @@ class CategoryController {
       if (findCategoryByName && findCategoryById.id !== id) throw new AppError('This name is already in use', 400);
 
       const updateContact = await CategoryRepository.update(id, { name });
-      console.log(updateContact);
       return response.status(200).json(updateContact);
     } catch (error) {
       return response.status(error.status).json({ message: error.message });

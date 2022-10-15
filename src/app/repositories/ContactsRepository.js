@@ -1,15 +1,24 @@
-const { update } = require('../controllers/ContactController');
+
 const database = require('../database');
 
 class ContactsRepository {
   async findAll(orderBy = 'ASC') {
     const direction = orderBy === 'DESC' ? 'DESC' : 'ASC';
-    const rows = await database.query(`SELECT * FROM contacts ORDER BY name ${direction} `);
+    const rows = await database.query(`
+      SELECT contacts.*, categories.name as category_name
+      FROM contacts
+      LEFT JOIN categories  on categories.id = contacts.category_id
+      ORDER BY contacts.name ${direction}
+      `);
     return rows;
   }
 
   async findById(id) {
-    const [row] = await database.query('SELECT * FROM contacts WHERE id=$1', [id]);
+    const [row] = await database.query(`
+    SELECT cont.*, cat.name AS category_name FROM contacts as cont
+    LEFT JOIN categories as cat ON cat.id = cont.category_id
+    WHERE cont.id = $1
+    `, [id]);
     return row;
   }
 

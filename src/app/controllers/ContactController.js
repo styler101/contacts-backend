@@ -22,7 +22,7 @@ class ContactController {
       if (!findContact) throw new AppError('Contact not found!', 404);
       return response.status(200).json(findContact);
     } catch (error) {
-      return response.status(error.status).json({ message: error.message });
+      return response.status(400).json({ message: error.message });
     }
   }
 
