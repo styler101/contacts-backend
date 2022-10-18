@@ -11,7 +11,7 @@ class ContactController {
       const contacts = await ContactsRepository.findAll(orderBy);
       return response.status(200).json(contacts);
     } catch (error) {
-      return response.status(400).json({ message: error.message });
+      return response.status(400).json({ message: 'Erro ao listar as categories' });
     }
   }
 
@@ -19,10 +19,12 @@ class ContactController {
     try {
       const { id } = request.params;
       const findContact = await ContactsRepository.findById(id);
-      if (!findContact) throw new AppError('Contact not found!', 404);
+      if (!findContact) {
+        return response.status(404).json({ message: 'This contact does not exists' });
+      }
       return response.status(200).json(findContact);
     } catch (error) {
-      return response.status(400).json({ message: error.message });
+      return response.status(error.status).json({ message: error.message });
     }
   }
 
@@ -32,12 +34,13 @@ class ContactController {
         name, email, phone, category_id,
       } = request.body;
 
-      if (!name) throw new AppError('Field name is required', 400);
-
+      if (!name) {
+        return response.status(404).json({ message: 'Field name is required' });
+      }
       const contactExists = await ContactsRepository.findByEmail(email);
-
-      if (contactExists) throw new AppError('This e-mails is already in used', 400);
-
+      if (contactExists) {
+        return response.status(400).json({ message: 'This e-mails is already in used' });
+      }
       const contact = await ContactsRepository.create({
         name, email, phone, category_id,
       });
@@ -55,12 +58,16 @@ class ContactController {
 
     // name is the only required field
     const findContactById = await ContactsRepository.findById(id);
-    if (!findContactById) throw new AppError('Ressource not found!', 400);
+    if (!findContactById) {
+      return response.status(400).json({ message: 'Resource not found' });
+    }
 
     if (!name) throw new AppError('Field name is required', 400);
 
     const contactExists = await ContactsRepository.findByEmail(email);
-    if (contactExists && findContactById.id !== id) throw new AppError('This e-mail is already in used', 400);
+    if (contactExists && findContactById.id !== id) {
+      return response.status(400).json({ message: 'This e-mail is already in used' });
+    }
 
     const updatedContact = await ContactsRepository.update(id, {
       id,
@@ -78,7 +85,10 @@ class ContactController {
       const { id } = request.params;
 
       const contact = await ContactsRepository.findById(id);
-      if (!contact) throw new AppError('This contact does not exists', 400);
+      if (!contact) {
+        return response.status(404).json({ message: 'Contact not found' });
+      }
+
       const success = await ContactsRepository.delete(id);
       return response.status(200).json({ success: true });
     } catch (error) {

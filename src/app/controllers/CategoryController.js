@@ -16,8 +16,9 @@ class CategoryController {
     try {
       const { id } = request.params;
       const category = await CategoryRepository.findById(id);
-      if (!category) throw new AppError('Ressource not found!', 400);
-
+      if (!category) {
+        return response.status(400).json({ message: 'Contact not found' });
+      }
       return response.status(200).json(category);
     } catch (error) {
       return response.status(error.status).json({ message: error.message });
@@ -27,16 +28,20 @@ class CategoryController {
   async store(request, response) {
     try {
       const { name } = request.body;
-      if (!name) throw new AppError('Field name is required', 400);
+      if (!name) {
+        return response.status(400).json({ message: 'This name is already in use.'})
+      }
+
 
       const categoryExists = await CategoryRepository.findByName(name);
 
-      if (categoryExists) throw new AppError('This name is already exists', 400);
-
+      if (categoryExists) {
+        return response.status(400).json({ message: 'Contact not exists' });
+      }
       const newCategory = await CategoryRepository.create(name);
       return response.status(201).json(newCategory);
     } catch (error) {
-      return response.status(error.status).json({ message: error.message });
+      return response.status(404).json({ message: error.message });
     }
   }
 
@@ -47,11 +52,16 @@ class CategoryController {
 
       const findCategoryById = await CategoryRepository.findById(id);
 
-      if (!findCategoryById) throw new AppError('This id is not exists', 400);
+      if (!findCategoryById) {
+        return response.status(400).json({ message: 'This id is not exists' });
+      }
 
       const findCategoryByName = await CategoryRepository.findByName(name);
 
-      if (findCategoryByName && findCategoryById.id !== id) throw new AppError('This name is already in use', 400);
+      if (findCategoryByName && findCategoryById.id !== id) {
+        return response.status(400).json({ message: 'This name is already in use' });
+      }
+
 
       const updateContact = await CategoryRepository.update(id, { name });
       return response.status(200).json(updateContact);
@@ -63,9 +73,13 @@ class CategoryController {
   async delete(request, response) {
     try {
       const { id } = request.params;
-      if (!id) throw new AppError('You must provided the id', 400);
+      if (!id) {
+        return response.status(400).message({ error: 'This id does not exists' });
+      }
       const categoryExists = await CategoryRepository.findById(id);
-      if (!categoryExists) throw new AppError('This Ressource does not exists!', 400);
+      if (!categoryExists) {
+        return response.status(400).message({ error: 'This Ressource does not exists' });
+      }
       await CategoryRepository.delete(id);
       return response.status(204).json({ success: true });
     } catch (error) {
